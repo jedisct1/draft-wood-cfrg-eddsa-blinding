@@ -1,0 +1,342 @@
+
+
+
+
+WG Working Group                                               C.A. Wood
+Internet-Draft                                          Cloudflare, Inc.
+Intended status: Informational                          21 December 2021
+Expires: 24 June 2022
+
+
+                           EdDSA Key Blinding
+                 draft-wood-cfrg-eddsa-blinding-latest
+
+Abstract
+
+   This document describes a variant of EdDSA as specified in [RFC8032]
+   for blinding private and public keys such that the blinded public key
+   and all signatures produced using the blinded key pair are unlinkable
+   to the unblinded key pair.  Signatures produced using blinded key
+   pairs are indistinguishable from standard EdDSA signatures.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://example.com/LATEST.  Status information for this document may
+   be found at https://datatracker.ietf.org/doc/draft-wood-cfrg-eddsa-
+   blinding/.
+
+   Discussion of this document takes place on the CFRG Working Group
+   mailing list (mailto:cfrg@irtf.org), which is archived at
+   https://mailarchive.ietf.org/arch/browse/cfrg/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/USER/REPO.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 24 June 2022.
+
+Copyright Notice
+
+   Copyright (c) 2021 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Definitions
+   3.  Key Blinding
+   4.  Ed25519ph, Ed25519ctx, and Ed25519
+     4.1.  BlindPublicKey and UnblindPublicKey
+     4.2.  BlindSign
+   5.  Ed448ph and Ed448
+     5.1.  BlindPublicKey and UnblindPublicKey
+     5.2.  BlindSign
+   6.  Security Considerations
+   7.  IANA Considerations
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
+   Acknowledgments
+   Test Vectors
+   Author's Address
+
+1.  Introduction
+
+   EdDSA [EDDSA] is a type of Schnorr signature algorithm based on
+   Edwards curves.  The specification [RFC8032] describes several
+   variants of EdDSA with parameter sets for the edwards25519 and
+   edwards448 curves as described in [RFC7748].  According to the
+   specification, private keys are randomly generated seeds, which are
+   then used to derive scalar elements and their corresponding public
+   group element for signing and verifying messages, respectively.
+
+   Given an EdDSA private and public key pair (sk, pk), any message
+   signed by sk is linkable to pk.  One simply checks whether the
+   message signature is valid under pk.  In some settings, in is useful
+   to produce signatures with a given key pair (sk, pk) such that the
+   resulting signature is not linkable to pk without knowledge of a
+   particular witness r.  That is, given pk corresponding to sk, witness
+   r, and a message signature, one can determine if the signature was
+   indeed produced using sk.  In effect, the witness "blinds" the key
+   pair associated with a message signature.
+
+   This document describes a modification to the EdDSA key generation
+   and signing procedures in [RFC8032] to support this blinding
+   operation, referred to as key blinding.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are used throughout this document to describe the
+   blinding modification.
+
+   *  sk: An EdDSA private key, which is a randomly generated private
+      seed of length 32 bytes or 57 bytes according to [RFC8032],
+      Section 5.1.5 or [RFC8032], Section 5.2.5, respectively.
+
+   *  pk(sk): The public key corresponding to the private key sk.
+
+   *  XOR(a,b): XOR of byte strings; xor(0xF0F0, 0x1234) = 0xE2C4.  It
+      is an error to call this function with two arguments of unequal
+      length.
+
+   *  ScalarMult(pk, k): Multiply the EdDSA public key pk by scalar k,
+      producing a new public key as a result.
+
+   In pseudocode descriptions below, integer multiplication of two EdDSA
+   scalar values is denoted by the * operator.  For example, the product
+   of two scalars x and y is denoted as x * y.
+
+3.  Key Blinding
+
+   At a high level, key blinding allows signers to use private keys to
+   blind their signing key such that any signature produced under the
+   blinded key pair is unlinkable to the original signing key pair.
+   Similar to the EdDSA private key used for signing, the blind is also
+   an EdDSA private key.
+
+   Key blinding extends the base EdDSA specification with three
+   routines:
+
+   *  BlindPublicKey(pkS, skB): Blind the public key pkS using the
+      private key skB.
+
+   *  UnblindPublicKey(pkM, skB): Unblind the public key pkM using the
+      private key skB.
+
+   *  BlindSign(skS, skB, msg): Sign a message msg using the private key
+      skS with the private blind skB.
+
+   Correctness requires the following equivalence to hold:
+
+   UnblindPublicKey(BlindPublicKey(pkS, skB), skB) = pkS
+
+   Security requires that signatures produced using BlindSign are
+   unlinkable from signatures produced using the standard EdDSA Sign
+   function with the same private key.
+
+4.  Ed25519ph, Ed25519ctx, and Ed25519
+
+   This section describes implementations of BlindPublicKey,
+   UnblindPublicKey, and BlindSign as modifications of routines in
+   [RFC8032], Section 5.1.
+
+4.1.  BlindPublicKey and UnblindPublicKey
+
+   BlindPublicKey transform a private blind skB into a scalar for the
+   edwards25519 group and then multiplies the target key by this scalar.
+   UnblindPublicKey performs essentially the same steps except that it
+   multiplies the target public key by the multiplicative inverse of the
+   scalar, where the inverse is computed using the order of the group L,
+   described in [RFC8032], Section 5.1.
+
+   More specifically, BlindPublicKey(pk, skB) works as follows.
+
+   1.  Hash the 32-byte private key skB using SHA-512, storing the
+       digest in a 64-octet large buffer, denoted h.  Only the lower 32
+       bytes are used for generating the public key.
+
+   2.  Prune the buffer: The lowest three bits of the first octet are
+       cleared, the highest bit of the last octet is cleared, and the
+       second highest bit of the last octet is set.
+
+   3.  Interpret the buffer as the little-endian integer, forming a
+       secret scalar s.  Perform a fixed-base scalar multiplication
+       ScalarMult(pk, s), and output the encoding of the resulting point
+       as the public key.
+
+   UnblindPublicKey(pkM, skB) works as follows.
+
+   1.  Compute the secret scalar s from skB as in BlindPublicKey.
+
+   2.  Compute the multiplicative inverse of s, denoted sInv, modulo L
+       as defined in [RFC8032], Section 5.1.
+
+   3.  Perform a fixed-base scalar multiplication ScalarMult(pk, s), and
+       output the encoding of the resulting point as the public key.
+
+4.2.  BlindSign
+
+   BlindSign transforms a private key skB into a scalar for the
+   edwards25519 group and a message prefix to blind both the signing
+   scalar and the prefix of the message used in the signature generation
+   routine.
+
+   More specifically, BlindSign(skS, skB, msg) works as follows:
+
+   1.  Hash the private key skS, 32 octets, using SHA-512.  Let h denote
+       the resulting digest.  Construct the secret scalar s1 from the
+       first half of the digest, and the corresponding public key A1, as
+       described in [RFC8032], Section 5.1.5.  Let prefix1 denote the
+       second half of the hash digest, h[32],...,h[63].
+
+   2.  Perform the same routine to transform the secret blind skB into a
+       secret scalar s2, public key A2, and prefix2.
+
+   3.  Compute the signing scalar s = s1 * s2 and the signing public key
+       A = ScalarMult(A1, s2).
+
+   4.  Compute the signing prefix as XOR(prefix1, prefix2).
+
+   5.  Run the rest of the Sign procedure in [RFC8032], Section 5.1.6
+       from step (2) onwards using the modified scalar s, public key A,
+       and string prefix.
+
+5.  Ed448ph and Ed448
+
+   This section describes implementations of BlindPublciKey,
+   UnblindPublicKey, and BlindSign as modifications of routines in
+   [RFC8032], Section 5.2.
+
+5.1.  BlindPublicKey and UnblindPublicKey
+
+   BlindPublicKey and UnblindPublicKey for Ed448ph and Ed448 are
+   implemented just as these routines are for Ed25519ph, Ed25519ctx, and
+   Ed25519, except that (1) SHAKE256 is used instead of SHA-512 for
+   hashing the secret blind to a 114-byte buffer, (2) the buffer is
+   pruned as described in [RFC8032], Section 5.2.5, and the order of the
+   edwards448 group L is as defined in [RFC8032], Section 5.2.1.
+
+5.2.  BlindSign
+
+   BlindSign for Ed448ph and Ed448 is implemented just as this routine
+   for Ed25519ph, Ed25519ctx, and Ed25519, except in how the scalars
+   (s1, s2), public keys (A1, A2), and message strings (prefix1,
+   prefix2) are computed.  More specifically, BlindSign(skS, skB, msg)
+   works as follows:
+
+   1.  Hash the private key skS, 57 octets, using SHAKE256(skS, 117).
+       Let h denote the resulting digest.  Construct the secret scalar
+       s1 from the first half of the digest, and the corresponding
+       public key A1, as described in [RFC8032], Section 5.2.5.  Let
+       prefix1 denote the second half of the hash digest,
+       h[57],...,h[113].
+
+   2.  Perform the same routine to transform the secret blind skB into a
+       secret scalar s2, public key A2, and prefix2.
+
+   3.  Compute the signing scalar s = s1 * s2 and the signing public key
+       A = ScalarMult(A1, s2).
+
+   4.  Compute the signing prefix as XOR(prefix1, prefix2).
+
+   5.  Run the rest of the Sign procedure in [RFC8032], Section 5.2.6
+       from step (2) onwards using the modified scalar s, public key A,
+       and string prefix.
+
+6.  Security Considerations
+
+   This document describes a variant of the identity key blinding
+   routine used in Tor's Hidden Service feature.  Security analysis for
+   that feature is contained [TORBLINDING].  Further analysis is needed
+   to ensure this is compliant with the signature algorithm described in
+   [RFC8032].
+
+7.  IANA Considerations
+
+   This document has no IANA actions.
+
+8.  References
+
+8.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8032]  Josefsson, S. and I. Liusvaara, "Edwards-Curve Digital
+              Signature Algorithm (EdDSA)", RFC 8032,
+              DOI 10.17487/RFC8032, January 2017,
+              <https://www.rfc-editor.org/rfc/rfc8032>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+8.2.  Informative References
+
+   [EDDSA]    Bernstein, D., Duif, N., Lange, T., Schwabe, P., and B.
+              Yang, "High-speed high-security signatures", Journal of
+              Cryptographic Engineering Vol. 2, pp. 77-89,
+              DOI 10.1007/s13389-012-0027-1, August 2012,
+              <https://doi.org/10.1007/s13389-012-0027-1>.
+
+   [RFC7748]  Langley, A., Hamburg, M., and S. Turner, "Elliptic Curves
+              for Security", RFC 7748, DOI 10.17487/RFC7748, January
+              2016, <https://www.rfc-editor.org/rfc/rfc7748>.
+
+   [TORBLINDING]
+              Hopper, N., "Proving Security of Tor’s Hidden Service
+              Identity Blinding Protocol", 2013,
+              <https://www-users.cse.umn.edu/~hoppernj/basic-proof.pdf>.
+
+Acknowledgments
+
+   The authors would like to thank Frank Denis and Dennis Jackson for
+   helpful discussions that informed the development of this draft.
+
+Test Vectors
+
+   TBD
+
+Author's Address
+
+   Christopher A. Wood
+   Cloudflare, Inc.
+   101 Townsend St
+   San Francisco,
+   United States of America
+
+   Email: caw@heapingbits.net
