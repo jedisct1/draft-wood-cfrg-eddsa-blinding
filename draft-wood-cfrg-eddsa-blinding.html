@@ -1158,24 +1158,24 @@ from standard EdDSA signatures.<a href="#section-abstract-1" class="pilcrow">¶<
             <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-references" class="xref">References</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-test-vectors" class="xref">Test Vectors</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
-                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-references" class="xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="xref">9.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="xref">9.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="xref"></a><a href="#name-acknowledgments" class="xref">Acknowledgments</a></p>
-</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="xref"></a><a href="#name-test-vectors" class="xref">Test Vectors</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="xref"></a><a href="#name-acknowledgments" class="xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="xref"></a><a href="#name-authors-address" class="xref">Author's Address</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="xref"></a><a href="#name-authors-address" class="xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1245,7 +1245,8 @@ is denoted as <code>x * y</code>.<a href="#section-2-4" class="pilcrow">¶</a></
 <p id="section-3-1">At a high level, key blinding allows signers to use private keys to blind their signing
 key such that any signature produced under the blinded key pair is unlinkable to the
 original signing key pair. Similar to the EdDSA private key used for signing, the blind 
-is also an EdDSA private key.<a href="#section-3-1" class="pilcrow">¶</a></p>
+is also an EdDSA private key. That is, the blind is a 32-byte or 57-byte random seed for
+Ed25519 or Ed448 variants, respectively.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">Key blinding extends the base EdDSA specification with three routines:<a href="#section-3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-3.1">BlindPublicKey(pkS, skB): Blind the public key pkS using the private key skB.<a href="#section-3-3.1" class="pilcrow">¶</a>
@@ -1408,13 +1409,44 @@ the signature algorithm described in <span>[<a href="#RFC8032" class="xref">RFC8
 <p id="section-7-1">This document has no IANA actions.<a href="#section-7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="test-vectors">
 <section id="section-8">
-      <h2 id="name-references">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      <h2 id="name-test-vectors">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
       </h2>
-<section id="section-8.1">
+<p id="section-8-1">This section contains test vectors for Ed25519 as described in <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.
+Each test vector lists the private key and blind seeds, denoted skS and skB
+and encoded as hexadecimal strings, the unblinded and blinded public keys,
+denoted pkS and pkB and encoded according to <span>[<a href="#RFC8032" class="xref">RFC8032</a>], <a href="https://rfc-editor.org/rfc/rfc8032#section-5.1.2" class="relref">Section 5.1.2</a></span>,
+and the message and signature values, each encoded as hexadecimal strings.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8-2">
+<pre>
+skS: 7757648a9be012e16fdbd9eecf8c46dc55118dbb1d33537393cf0ca1882dcc34
+pkS: e47585e020dd4dc1bc2ae180d388dce87bbc02e63549850ffeda7f254de75b46
+skB: f05749b277d523951b91598200c45e08c3c32d068865f6d824d4c9a84ba80119
+pkB: 373108f6fcb5512323e3b547b3ba19ab09f2a4f162f86395208ba0e97c300e62
+message: 68656c6c6f20776f726c64
+signature: a6d2f5df8664115bf071a5c6875417c83c76d1d3a39c202b318a1092a6b4c
+504cc6dcd3cbbc8ae64133eb4eb56fd6382c1c9a3a368523baa59c1b281bf9be70c
+
+skS: 04de9ba8ba552c0379d23c2df30fc7885e96bf06f16f358b15f9cfa3d3883de7
+pkS: d57b9110cea129c936e8e04e059dfce9b27f7f86c09f16eb4867a63975cf78df
+skB: 0000000000000000000000000000000000000000000000000000000000000000
+pkB: bf9ed30201648d1d7305ad286942f474fddb8d8e0b43e80119faa7e7d9e5c3f0
+message: 68656c6c6f20776f726c64
+signature: 273747fae89912932dd1831cdf91ede33474a9f31c4c486fe794c700ddf91
+a68fcfd02c832363f84e496258b3e467747a14a4656dda6f04103780141641fda0f
+</pre><a href="#section-8-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-9.1">
         <h3 id="name-normative-references">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="RFC2119">[RFC2119]</dt>
@@ -1431,9 +1463,9 @@ the signature algorithm described in <span>[<a href="#RFC8032" class="xref">RFC8
 <dd class="break"></dd>
 </dl>
 </section>
-<section id="section-8.2">
+<section id="section-9.2">
         <h3 id="name-informative-references">
-<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="EDDSA">[EDDSA]</dt>
@@ -1460,16 +1492,8 @@ the signature algorithm described in <span>[<a href="#RFC8032" class="xref">RFC8
 that informed the development of this draft.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="test-vectors">
-<section id="appendix-B">
-      <h2 id="name-test-vectors">
-<a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
-      </h2>
-<p id="appendix-B-1">TBD<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-</section>
-</div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-B">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
