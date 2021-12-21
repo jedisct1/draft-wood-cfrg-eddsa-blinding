@@ -225,8 +225,8 @@ Table of Contents
    2.  Perform the same routine to transform the secret blind skB into a
        secret scalar s2, public key A2, and prefix2.
 
-   3.  Compute the signing scalar s = s1 * s2 and the signing public key
-       A = ScalarMult(A1, s2).
+   3.  Compute the signing scalar s = s1 * s2 (mod L) and the signing
+       public key A = ScalarMult(A1, s2).
 
    4.  Compute the signing prefix as XOR(prefix1, prefix2).
 
@@ -267,8 +267,8 @@ Table of Contents
    2.  Perform the same routine to transform the secret blind skB into a
        secret scalar s2, public key A2, and prefix2.
 
-   3.  Compute the signing scalar s = s1 * s2 and the signing public key
-       A = ScalarMult(A1, s2).
+   3.  Compute the signing scalar s = s1 * s2 (mod L) and the signing
+       public key A = ScalarMult(A1, s2).
 
    4.  Compute the signing prefix as XOR(prefix1, prefix2).
 

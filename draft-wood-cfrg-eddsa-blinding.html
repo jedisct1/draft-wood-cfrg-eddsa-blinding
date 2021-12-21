@@ -1328,7 +1328,7 @@ half of the hash digest, h[32],...,h[63].<a href="#section-4.2-3.1" class="pilcr
           <li id="section-4.2-3.2">Perform the same routine to transform the secret blind skB into a secret
 scalar s2, public key A2, and prefix2.<a href="#section-4.2-3.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-3.3">Compute the signing scalar s = s1 * s2 and the signing public key A = ScalarMult(A1, s2).<a href="#section-4.2-3.3" class="pilcrow">¶</a>
+          <li id="section-4.2-3.3">Compute the signing scalar s = s1 * s2 (mod L) and the signing public key A = ScalarMult(A1, s2).<a href="#section-4.2-3.3" class="pilcrow">¶</a>
 </li>
           <li id="section-4.2-3.4">Compute the signing prefix as XOR(prefix1, prefix2).<a href="#section-4.2-3.4" class="pilcrow">¶</a>
 </li>
@@ -1378,7 +1378,7 @@ half of the hash digest, h[57],...,h[113].<a href="#section-5.2-2.1" class="pilc
           <li id="section-5.2-2.2">Perform the same routine to transform the secret blind skB into a secret
 scalar s2, public key A2, and prefix2.<a href="#section-5.2-2.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-5.2-2.3">Compute the signing scalar s = s1 * s2 and the signing public key A = ScalarMult(A1, s2).<a href="#section-5.2-2.3" class="pilcrow">¶</a>
+          <li id="section-5.2-2.3">Compute the signing scalar s = s1 * s2 (mod L) and the signing public key A = ScalarMult(A1, s2).<a href="#section-5.2-2.3" class="pilcrow">¶</a>
 </li>
           <li id="section-5.2-2.4">Compute the signing prefix as XOR(prefix1, prefix2).<a href="#section-5.2-2.4" class="pilcrow">¶</a>
 </li>
