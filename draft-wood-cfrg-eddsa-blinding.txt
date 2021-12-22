@@ -4,8 +4,8 @@
 
 WG Working Group                                               C.A. Wood
 Internet-Draft                                          Cloudflare, Inc.
-Intended status: Informational                          21 December 2021
-Expires: 24 June 2022
+Intended status: Informational                          22 December 2021
+Expires: 25 June 2022
 
 
                            EdDSA Key Blinding
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 June 2022.
+   This Internet-Draft will expire on 25 June 2022.
 
 Copyright Notice
 
@@ -127,7 +127,7 @@ Table of Contents
 
    *  pk(sk): The public key corresponding to the private key sk.
 
-   *  XOR(a,b): XOR of byte strings; xor(0xF0F0, 0x1234) = 0xE2C4.  It
+   *  XOR(a,b): XOR of byte strings; XOR(0xF0F0, 0x1234) = 0xE2C4.  It
       is an error to call this function with two arguments of unequal
       length.
 
