@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-01-16T00:15:37.751307+00:00",
+  "timestamp": "2022-01-18T00:16:33.867125+00:00",
   "repo": "chris-wood/draft-wood-cfrg-eddsa-blinding",
   "labels": [
     {
@@ -49,6 +49,87 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOGj2OAM5B3b_l",
+      "title": "Key derivation",
+      "url": "https://github.com/chris-wood/draft-wood-cfrg-eddsa-blinding/issues/1",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Key derivation and blinding are sometimes used interchangeably, especially in the context of BIP32, but they seem to be different functionalities. In particular, key derivation works like so. Assume the key pair `x` and `xG`, for scalar `x` and generator `G`. Deriving a key with index `j` from `(x, xG)` can be done by computing a new private key `x_j = Hash(xG || j) + x` and the corresponding public key as `xG + x_jG`. This computation is deterministic and allows the public key to be derived based on _public_ information only, a property referred to in the literature as [public derivation](https://eprint.iacr.org/2019/704.pdf). In contrast, one could generate `x_j` as `x_j = Hash(x || j) + x`. ",
+      "createdAt": "2022-01-16T13:24:03Z",
+      "updatedAt": "2022-01-16T13:47:53Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDOGj2OAM5B3cLj",
+      "title": "Additive and multiplicative blinding",
+      "url": "https://github.com/chris-wood/draft-wood-cfrg-eddsa-blinding/issues/2",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The current draft supports multiplicative blinding, which means that blinding and unblinding requires knowledge of the _private_ blind value. Additive blinding may also be feasible, especially for other signature algorithms [like ECDSA](https://eprint.iacr.org/2021/1330.pdf). It generally works like so. Assume a private key `x` and public key `xG`, for generator `G`. Additive blinding generates secret key `x+b`, for random scalar `b`, and corresponding public key `xG + bG`. Note that these line up since `(x+b)G = xG + bG`.\r\n\r\nThis has some useful properties, like being able to blind and unblind using only the _public_ key. However, that may not be appropriate for all applications.",
+      "createdAt": "2022-01-16T13:27:27Z",
+      "updatedAt": "2022-01-16T13:40:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 3,
+      "id": "I_kwDOGj2OAM5B3cge",
+      "title": "Other signature schemes",
+      "url": "https://github.com/chris-wood/draft-wood-cfrg-eddsa-blinding/issues/3",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft currently focuses on EdDSA as specified in RFC8032. We might want to consider widening scope and targeting other signature schemes and curves, e.g., ECDSA over secp256k1.",
+      "createdAt": "2022-01-16T13:33:29Z",
+      "updatedAt": "2022-01-16T13:34:00Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 4,
+      "id": "I_kwDOGj2OAM5B3dt8",
+      "title": "Abstraction properties",
+      "url": "https://github.com/chris-wood/draft-wood-cfrg-eddsa-blinding/issues/4",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "[This paper](https://eprint.iacr.org/2019/704.pdf) captures some properties we might want quite nicely, including deterministic secret generation and public derivation (deriving public values without private information). Should the abstraction support both derivation based on public and private information? That is, deriving a key with a private value, and deriving a key with a public value.",
+      "createdAt": "2022-01-16T13:55:06Z",
+      "updatedAt": "2022-01-16T13:55:06Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOGj2OAM5B3d0r",
+      "title": "Rename BlindSign",
+      "url": "https://github.com/chris-wood/draft-wood-cfrg-eddsa-blinding/issues/5",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "This isn't a blind signature. It's rather \"sign using a blinded private key.\" There's probably a better way to describe this operation.",
+      "createdAt": "2022-01-16T13:56:53Z",
+      "updatedAt": "2022-01-16T13:56:53Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": []
 }
